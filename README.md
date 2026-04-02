@@ -1,3 +1,12 @@
+
+![Python](https://img.shields.io/badge/Python-3.8+-blue?style=flat-square&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-Deployed-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E?style=flat-square&logo=scikit-learn&logoColor=white)
+![XGBoost](https://img.shields.io/badge/XGBoost-1.7+-189AB4?style=flat-square)
+![Random Forest](https://img.shields.io/badge/Model-Random%20Forest-2E86C1?style=flat-square)
+![Accuracy](https://img.shields.io/badge/Accuracy-99.17%25-2ECC71?style=flat-square)
+![License](https://img.shields.io/badge/License-Academic-lightgrey?style=flat-square)
+
 # Symptom-Based Patient Triage Using Machine Learning
 
 > An AI-powered triage system that classifies patient-reported symptoms into urgency levels to improve healthcare access for rural and low-income populations.
