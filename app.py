@@ -22,9 +22,9 @@ model, le = load_model()
 # ── Get Feature Columns ──
 @st.cache_resource
 def get_feature_cols():
-    demographic_cols = ['Age', 'Blood Pressure', 'Cholesterol Level']
+    demographic_cols = ['Age', 'Gender', 'Blood Pressure', 'Cholesterol Level']
     all_features     = list(model.named_steps['scaler'].feature_names_in_)
-    symptom_cols     = [f for f in all_features if f not in demographic_cols and f != 'Gender']
+    symptom_cols     = [f for f in all_features if f not in demographic_cols]
     return all_features, symptom_cols
 
 all_features, symptom_cols = get_feature_cols()
@@ -43,6 +43,11 @@ st.markdown("""
 # User Inputs
 st.sidebar.header('Step 1 — About you')
 age = st.sidebar.number_input('Age', 0, 120, 25)
+gender = st.sidebar.radio(
+    'What is your gender?',
+    ['Female', 'Male'],
+    horizontal=True
+)
 blood_pressure = st.sidebar.selectbox('Blood Pressure', ['Normal', 'Low', 'High'])
 cholesterol = st.sidebar.selectbox(
     'What is your cholesterol level? (if known)',
@@ -120,11 +125,13 @@ if predict_btn:
     if total_symptoms == 0:
         st.warning("Please select at least one symptom before continuing.")
     else:
+        gender_val = 1 if gender == 'Male' else 0
         bp_val     = {'Low': 0, 'Normal': 1, 'High': 2}[blood_pressure]
         chol_val   = 1 if cholesterol == 'High' else 0
 
         input_data = pd.DataFrame(0, index=[0], columns=all_features)
         input_data['Age']               = age
+        input_data['Gender']            = gender_val
         input_data['Blood Pressure']    = bp_val
         input_data['Cholesterol Level'] = chol_val
 
@@ -183,8 +190,6 @@ if predict_btn:
         st.markdown(f"""
             <div style='
                 background-color: {bg_color};
-                border-left: 6px solid {color};
-                border-radius: 0 8px 8px 0;
                 padding: 1.4rem 1.6rem;
                 margin-bottom: 1rem;
             '>

@@ -84,7 +84,7 @@ Two publicly available datasets were combined to enrich feature coverage:
 ### Dataset 1 — Disease Symptoms and Patient Profile Dataset
 - Source: [Kaggle — uom190346a](https://www.kaggle.com/datasets/uom190346a/disease-symptoms-and-patient-profile-dataset)
 - Records: 3,490
-- Features: Fever, Cough, Fatigue, Difficulty Breathing, Age, Blood Pressure, Cholesterol Level
+- Features: Fever, Cough, Fatigue, Difficulty Breathing, Age, Gender, Blood Pressure, Cholesterol Level
 - Used in: Sogandi, F. (2024). *Scientific Reports*, 14, 17956.
 
 ### Dataset 2 — Disease Symptom Prediction Dataset
@@ -95,7 +95,7 @@ Two publicly available datasets were combined to enrich feature coverage:
 
 ### Combined Dataset
 - Total records: ~8,410
-- Total features: 130+ binary symptom columns + 3 demographic columns
+- Total features: 130+ binary symptom columns + 4 demographic columns
 - Target variable: `Triage_Label` (3 classes)
 
 ---
@@ -228,6 +228,7 @@ df1.rename(columns={
     'Fatigue': 'fatigue', 'Difficulty Breathing': 'difficulty_breathing'
 }, inplace=True)
 
+df1['Gender'] = df1['Gender'].map({'Male': 1, 'Female': 0})
 df1['Blood Pressure'] = df1['Blood Pressure'].map({'Low': 0, 'Normal': 1, 'High': 2})
 df1['Cholesterol Level'] = df1['Cholesterol Level'].map({'Normal': 0, 'High': 1})
 df1.drop(columns=['Outcome Variable'], inplace=True)
@@ -250,6 +251,7 @@ combined = pd.concat([df1, df2_binarised], axis=0, ignore_index=True)
 
 # Impute missing demographics
 combined['Age'] = combined['Age'].fillna(combined['Age'].median())
+combined['Gender'] = combined['Gender'].fillna(combined['Gender'].mode()[0])
 combined['Blood Pressure'] = combined['Blood Pressure'].fillna(combined['Blood Pressure'].mode()[0])
 combined['Cholesterol Level'] = combined['Cholesterol Level'].fillna(combined['Cholesterol Level'].mode()[0])
 ```
@@ -332,7 +334,7 @@ XGBClassifier(
 
 The deployed application provides:
 - Symptom selection checklist grouped by body system
-- Demographic inputs (age, blood pressure, cholesterol)
+- Demographic inputs (age, gender, blood pressure, cholesterol)
 - Colour-coded triage recommendation (green / amber / red)
 - Confidence score per class
 - Top contributing symptoms driving the prediction
