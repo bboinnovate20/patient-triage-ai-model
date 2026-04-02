@@ -189,7 +189,7 @@ with right_col:
 
     # ── Predict Button ──
     predict_btn = st.button(
-        '🔍 Predict Triage Level',
+        'Predict Triage Level',
         use_container_width=True,
         type='primary'
     )
@@ -240,15 +240,15 @@ if predict_btn:
         if result_label == 'Emergency':
             color     = '#e74c3c'
             bg_color  = '#fdecea'
-            action    = 'Seek emergency care immediately or call **999**.'
+            
         elif result_label == 'GP Appointment':
             color     = '#e67e22'
             bg_color  = '#fef9f0'
-            action    = 'Book a GP appointment within **1 to 5 days**.'
+            
         else:
             color     = '#27ae60'
             bg_color  = '#eafaf1'
-            action    = 'Manage at home with rest and over-the-counter remedies.'
+            
 
         # Result card
         st.markdown(f"""
@@ -262,7 +262,7 @@ if predict_btn:
                 <h2 style='color:{color}; margin:0 0 0.4rem 0;'>
                     {result_label}
                 </h2>
-                <p style='margin:0; font-size:1rem;'>{action}</p>
+                
             </div>
         """, unsafe_allow_html=True)
 
@@ -328,7 +328,6 @@ if predict_btn:
 st.divider()
 st.markdown("""
     <div style='text-align:center; color:gray; font-size:0.8rem; padding-bottom:1rem;'>
-        COM 763 Advanced Machine Learning — Wrexham University |
         Model: Random Forest | Accuracy: 87.77% | Macro F1: 0.8798
     </div>
 """, unsafe_allow_html=True)
