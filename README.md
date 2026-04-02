@@ -161,17 +161,17 @@ Three models were trained and compared. Random Forest was selected as the final 
 
 | Rank | Model | Accuracy | Precision | Recall | F1 (Macro) | Time (s) |
 |---|---|---|---|---|---|---|
-| 1 | Random Forest | 0.9917 | 0.9917 | 0.9917 | 0.9917 | 1.08 |
-| 2 | XGBoost | 0.9897 | 0.9897 | 0.9897 | 0.9897 | 5.86 |
-| 3 | Logistic Regression | 0.7314 | 0.7295 | 0.7314 | 0.7288 | 1.00 |
+| 1 | Random Forest | 0.8777 | 0.8922 | 0.8776 | 0.8798 | 0.33 |
+| 2 | XGBoost | 0.8511 | 0.8660 | 0.8510 | 0.8529 | 0.41 |
+| 3 | Logistic Regression | 0.6223 | 0.6298 | 0.6217 | 0.6199 | 0.04 |
 
 ### Cross-Validation Results (5-Fold Stratified)
 
 | Model | CV F1 (Mean) | CV F1 (Std) |
 |---|---|---|
-| Random Forest | 0.9883 | 0.0032 |
-| XGBoost | 0.9863 | 0.0029 |
-| Logistic Regression | 0.7195 | 0.0054 |
+| Random Forest | 0.8414 | 0.0073 |
+| XGBoost | 0.8435 | 0.0252 |
+| Logistic Regression | 0.6337 | 0.0299 |
 
 ### Confusion Matrix — Random Forest
 
