@@ -324,6 +324,79 @@ if predict_btn:
             "qualified healthcare professional for diagnosis and treatment."
         )
 
+
+        # ── Model Performance Info Panel ──
+with st.expander("ℹ️ About this model — accuracy and performance", expanded=False):
+
+    st.markdown("#### How accurate is this triage system?")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Model Accuracy", "87.77%", help="Correct predictions on test data")
+    with col2:
+        st.metric("Macro F1 Score", "0.8798", help="Balanced metric across all 3 classes")
+    with col3:
+        st.metric("CV F1 Mean", "0.8414", help="5-fold cross-validation result")
+    with col4:
+        st.metric("CV Stability", "±0.0073", help="Low variance = consistent results")
+
+    st.divider()
+
+    st.markdown("#### How it was built")
+
+    col_a, col_b, col_c = st.columns(3)
+
+    with col_a:
+        st.markdown("""
+        **Model selected**
+        Random Forest Classifier trained on 8,410 patient records
+        across two merged symptom datasets.
+        """)
+
+    with col_b:
+        st.markdown("""
+        **Three models compared**
+        Logistic Regression (62%), XGBoost (85.29%),
+        Random Forest (87.77%). Random Forest won on all metrics.
+        """)
+
+    with col_c:
+        st.markdown("""
+        **Class balance**
+        SMOTE was applied to balance Emergency, GP Appointment,
+        and Self-Care classes to exactly 33.3% each.
+        """)
+
+    st.divider()
+
+    st.markdown("#### Per-class recall")
+
+    r1, r2, r3 = st.columns(3)
+    with r1:
+        st.metric(
+            "Emergency recall", "87.1%",
+            delta="0 missed as Self-Care",
+            delta_color="normal"
+        )
+    with r2:
+        st.metric(
+            "GP Appointment recall", "93.7%",
+            delta="Strongest class",
+            delta_color="normal"
+        )
+    with r3:
+        st.metric(
+            "Self-Care recall", "82.5%",
+            delta="10 sent to GP (safe)",
+            delta_color="normal"
+        )
+
+    st.divider()
+    st.caption(
+        "This model was developed for COM 763 Advanced Machine Learning at Wrexham University. "
+        "It is a research prototype and should not be used as a substitute for clinical judgement."
+    )
+
 # ── Footer ──
 st.divider()
 st.markdown("""
