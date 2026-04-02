@@ -15,23 +15,21 @@ st.title('⚕️ Patient Triage System')
 # User Inputs
 st.sidebar.header('Patient Profile')
 age = st.sidebar.number_input('Age', 0, 120, 25)
-gender = st.sidebar.selectbox('Gender', ['Female', 'Male'])
 bp = st.sidebar.selectbox('Blood Pressure', ['Low', 'Normal', 'High'])
 chol = st.sidebar.selectbox('Cholesterol', ['Normal', 'High'])
 
 # Pre-process inputs
-gender_val = 1 if gender == 'Male' else 0
 bp_map = {'Low': 0, 'Normal': 1, 'High': 2}
 chol_val = 1 if chol == 'High' else 0
 
 st.subheader('Select Symptoms')
 all_features = model.feature_names_in_
-symptom_cols = [c for c in all_features if c not in ['Age', 'Gender', 'Blood Pressure', 'Cholesterol Level']]
+symptom_cols = [c for c in all_features if c not in ['Age', 'Blood Pressure', 'Cholesterol Level'] and c != 'Gender']
 selected = st.multiselect('Symptoms', symptom_cols)
 
 if st.button('Run Triage Prediction'):
     input_df = pd.DataFrame(0, index=[0], columns=all_features)
-    input_df.loc[0, ['Age', 'Gender', 'Blood Pressure', 'Cholesterol Level']] = [age, gender_val, bp_map[bp], chol_val]
+    input_df.loc[0, ['Age', 'Blood Pressure', 'Cholesterol Level']] = [age, bp_map[bp], chol_val]
     for s in selected: input_df.loc[0, s] = 1
     
     pred = model.predict(input_df)[0]

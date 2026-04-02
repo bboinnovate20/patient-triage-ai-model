@@ -22,9 +22,9 @@ model, le = load_model()
 # ── Get Feature Columns ──
 @st.cache_resource
 def get_feature_cols():
-    demographic_cols = ['Age', 'Gender', 'Blood Pressure', 'Cholesterol Level']
+    demographic_cols = ['Age', 'Blood Pressure', 'Cholesterol Level']
     all_features     = list(model.named_steps['scaler'].feature_names_in_)
-    symptom_cols     = [f for f in all_features if f not in demographic_cols]
+    symptom_cols     = [f for f in all_features if f not in demographic_cols and f != 'Gender']
     return all_features, symptom_cols
 
 all_features, symptom_cols = get_feature_cols()
@@ -43,11 +43,6 @@ st.markdown("""
 # User Inputs
 st.sidebar.header('Step 1 — About you')
 age = st.sidebar.number_input('Age', 0, 120, 25)
-gender = st.sidebar.radio(
-    'What is your gender?',
-    ['Female', 'Male'],
-    horizontal=True
-)
 blood_pressure = st.sidebar.selectbox('Blood Pressure', ['Normal', 'Low', 'High'])
 cholesterol = st.sidebar.selectbox(
     'What is your cholesterol level? (if known)',
@@ -58,12 +53,6 @@ cholesterol = st.sidebar.selectbox(
 # st.subheader("Step 1 — About you")
 
 # age = st.slider('How old are you?', 0, 100, 30)
-
-# gender = st.radio(
-#     'What is your gender?',
-#     ['Female', 'Male'],
-#     horizontal=True
-# )
 
 # blood_pressure = st.selectbox(
 #     'What is your blood pressure level? (if known)',
@@ -76,8 +65,6 @@ cholesterol = st.sidebar.selectbox(
 #     ['Normal', 'High'],
 #     help='Select Normal if you are unsure'
 # )
-
-st.divider()
 
 # ── STEP 2: How are you feeling ──
 st.subheader("Step 2 — How are you feeling right now?")
@@ -133,13 +120,11 @@ if predict_btn:
     if total_symptoms == 0:
         st.warning("Please select at least one symptom before continuing.")
     else:
-        gender_val = 1 if gender == 'Male' else 0
         bp_val     = {'Low': 0, 'Normal': 1, 'High': 2}[blood_pressure]
         chol_val   = 1 if cholesterol == 'High' else 0
 
         input_data = pd.DataFrame(0, index=[0], columns=all_features)
         input_data['Age']               = age
-        input_data['Gender']            = gender_val
         input_data['Blood Pressure']    = bp_val
         input_data['Cholesterol Level'] = chol_val
 
