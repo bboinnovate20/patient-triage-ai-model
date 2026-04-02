@@ -7,8 +7,7 @@ import numpy as np
 st.set_page_config(
     page_title='Patient Triage System',
     page_icon='🏥',
-    layout='centered',
-    initial_sidebar_state='collapsed'
+    layout="wide"
 )
 
 # ── Load Model and Encoder ──
@@ -39,8 +38,6 @@ st.markdown("""
         </p>
     </div>
 """, unsafe_allow_html=True)
-
-st.divider()
 
 # ── STEP 1: About You ──
 # User Inputs
