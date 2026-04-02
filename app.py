@@ -43,27 +43,42 @@ st.markdown("""
 st.divider()
 
 # ── STEP 1: About You ──
-st.subheader("Step 1 — About you")
-
-age = st.slider('How old are you?', 0, 100, 30)
-
-gender = st.radio(
+# User Inputs
+st.sidebar.header('Step 1 — About you')
+age = st.sidebar.number_input('Age', 0, 120, 25)
+gender = st.sidebar.radio(
     'What is your gender?',
     ['Female', 'Male'],
     horizontal=True
 )
-
-blood_pressure = st.selectbox(
-    'What is your blood pressure level? (if known)',
-    ['Normal', 'Low', 'High'],
-    help='Select Normal if you are unsure'
-)
-
-cholesterol = st.selectbox(
+blood_pressure = st.sidebar.selectbox('Blood Pressure', ['Normal', 'Low', 'High'])
+cholesterol = st.sidebar.selectbox(
     'What is your cholesterol level? (if known)',
     ['Normal', 'High'],
     help='Select Normal if you are unsure'
 )
+
+# st.subheader("Step 1 — About you")
+
+# age = st.slider('How old are you?', 0, 100, 30)
+
+# gender = st.radio(
+#     'What is your gender?',
+#     ['Female', 'Male'],
+#     horizontal=True
+# )
+
+# blood_pressure = st.selectbox(
+#     'What is your blood pressure level? (if known)',
+#     ['Normal', 'Low', 'High'],
+#     help='Select Normal if you are unsure'
+# )
+
+# cholesterol = st.selectbox(
+#     'What is your cholesterol level? (if known)',
+#     ['Normal', 'High'],
+#     help='Select Normal if you are unsure'
+# )
 
 st.divider()
 
