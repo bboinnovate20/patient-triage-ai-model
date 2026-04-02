@@ -7,8 +7,8 @@ import numpy as np
 st.set_page_config(
     page_title='Patient Triage System',
     page_icon='🏥',
-    layout='wide',
-    initial_sidebar_state='expanded'
+    layout='centered',
+    initial_sidebar_state='collapsed'
 )
 
 # ── Load Model and Encoder ──
@@ -26,192 +26,111 @@ def get_feature_cols():
     demographic_cols = ['Age', 'Gender', 'Blood Pressure', 'Cholesterol Level']
     all_features     = list(model.named_steps['scaler'].feature_names_in_)
     symptom_cols     = [f for f in all_features if f not in demographic_cols]
-    return all_features, symptom_cols, demographic_cols
+    return all_features, symptom_cols
 
-all_features, symptom_cols, demographic_cols = get_feature_cols()
-
-# ── Symptom Groups for UI ──
-respiratory_symptoms = [s for s in symptom_cols if any(k in s.lower() for k in [
-    'cough', 'breath', 'chest', 'wheez', 'mucus', 'phlegm', 'throat',
-    'sinus', 'nasal', 'runny', 'congestion', 'asthma', 'pneumon'
-])]
-gastrointestinal_symptoms = [s for s in symptom_cols if any(k in s.lower() for k in [
-    'nausea', 'vomit', 'abdomen', 'abdominal', 'diarrhoe', 'stomach',
-    'gastro', 'bowel', 'indigestion', 'acidity', 'ulcer', 'appetite'
-])]
-neurological_symptoms = [s for s in symptom_cols if any(k in s.lower() for k in [
-    'headache', 'dizz', 'migraine', 'seizure', 'paralys', 'confusion',
-    'memory', 'altered', 'sensori', 'stiff_neck', 'tremors', 'anxiety'
-])]
-skin_symptoms = [s for s in symptom_cols if any(k in s.lower() for k in [
-    'rash', 'itch', 'skin', 'blister', 'peeling', 'pus', 'dischrom',
-    'nodal', 'eruption', 'acne', 'bruising'
-])]
-general_symptoms = [s for s in symptom_cols if s not in
-    respiratory_symptoms + gastrointestinal_symptoms +
-    neurological_symptoms + skin_symptoms
-]
+all_features, symptom_cols = get_feature_cols()
 
 # ── Header ──
 st.markdown("""
-    <div style='text-align:center; padding: 1rem 0 0.5rem 0;'>
-        <h1 style='font-size:2.2rem; margin-bottom:0.2rem;'>🏥 Patient Triage System</h1>
-        <p style='color:gray; font-size:1rem;'>
-            AI-powered symptom assessment to guide appropriate level of care
+    <div style='text-align:center; padding: 1.5rem 0 0.5rem 0;'>
+        <h1 style='font-size:2rem; margin-bottom:0.3rem;'>🏥 Patient Triage System</h1>
+        <p style='color:gray; font-size:0.95rem;'>
+            Answer the questions below to receive a triage recommendation
         </p>
     </div>
 """, unsafe_allow_html=True)
 
 st.divider()
 
-# ── Disclaimer Banner ──
-st.warning(
-    "⚠️ **Important:** This tool is for decision-support purposes only. "
-    "It does not replace professional medical advice. "
-    "If you are experiencing a life-threatening emergency, call **999** immediately."
+# ── STEP 1: About You ──
+st.subheader("Step 1 — About you")
+
+age = st.slider('How old are you?', 0, 100, 30)
+
+gender = st.radio(
+    'What is your gender?',
+    ['Female', 'Male'],
+    horizontal=True
+)
+
+blood_pressure = st.selectbox(
+    'What is your blood pressure level? (if known)',
+    ['Normal', 'Low', 'High'],
+    help='Select Normal if you are unsure'
+)
+
+cholesterol = st.selectbox(
+    'What is your cholesterol level? (if known)',
+    ['Normal', 'High'],
+    help='Select Normal if you are unsure'
 )
 
 st.divider()
 
-# ── Layout: Two Columns ──
-left_col, right_col = st.columns([1, 2])
+# ── STEP 2: How are you feeling ──
+st.subheader("Step 2 — How are you feeling right now?")
+st.caption("Tick everything that applies. You do not need to know the medical name — just describe what you feel.")
 
-# ── LEFT: Demographics ──
-with left_col:
-    st.subheader("👤 Patient Demographics")
+# Core symptoms with plain English labels
+fever              = st.checkbox('I have a high temperature or feel feverish')
+cough              = st.checkbox('I have a cough')
+fatigue            = st.checkbox('I feel unusually tired or exhausted')
+difficulty_breathing = st.checkbox('I am having difficulty breathing or feel short of breath')
 
-    age = st.slider('Age', 0, 100, 30, help='Patient age in years')
+st.markdown("**Any other symptoms?**")
+st.caption("Select as many as apply from the list below.")
 
-    gender = st.selectbox('Gender', ['Female', 'Male'])
+# Clean up symptom names for display
+def clean_label(s):
+    return s.replace('_', ' ').strip().capitalize()
 
-    blood_pressure = st.selectbox(
-        'Blood Pressure',
-        ['Low', 'Normal', 'High'],
-        help='Patient reported or measured blood pressure level'
-    )
+symptom_display = {clean_label(s): s for s in sorted(symptom_cols)}
 
-    cholesterol = st.selectbox(
-        'Cholesterol Level',
-        ['Normal', 'High'],
-        help='Patient reported or measured cholesterol level'
-    )
+selected_display = st.multiselect(
+    'Additional symptoms:',
+    options=list(symptom_display.keys()),
+    placeholder='Start typing or scroll to find symptoms...'
+)
 
-    st.divider()
+selected_raw = [symptom_display[d] for d in selected_display]
 
-    # Core symptoms always shown
-    st.subheader("🌡️ Core Symptoms")
-    fever              = st.checkbox('Fever')
-    cough              = st.checkbox('Cough')
-    fatigue            = st.checkbox('Fatigue')
-    difficulty_breathing = st.checkbox('Difficulty Breathing')
+# Count
+core_count    = sum([fever, cough, fatigue, difficulty_breathing])
+total_symptoms = core_count + len(selected_raw)
 
-    # Symptom count indicator
-    core_count = sum([fever, cough, fatigue, difficulty_breathing])
-    st.caption(f"Core symptoms selected: **{core_count}**")
+if total_symptoms > 0:
+    st.caption(f"You have selected **{total_symptoms}** symptom(s) in total.")
 
-# ── RIGHT: Symptom Groups ──
-with right_col:
-    st.subheader("🩺 Additional Symptoms")
-    st.caption("Select all symptoms the patient is currently experiencing.")
+st.divider()
 
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "🫁 Respiratory",
-        "🫃 Gastrointestinal",
-        "🧠 Neurological",
-        "🧴 Skin",
-        "⚡ General"
-    ])
+# ── STEP 3: Predict ──
+st.subheader("Step 3 — Get your triage recommendation")
+st.caption(
+    "Based on your symptoms and information, the system will suggest "
+    "the most appropriate level of care."
+)
 
-    with tab1:
-        if respiratory_symptoms:
-            resp_selected = st.multiselect(
-                'Respiratory symptoms:',
-                sorted(respiratory_symptoms),
-                key='resp'
-            )
-        else:
-            resp_selected = []
-            st.info('No respiratory symptoms found in feature set.')
-
-    with tab2:
-        if gastrointestinal_symptoms:
-            gi_selected = st.multiselect(
-                'Gastrointestinal symptoms:',
-                sorted(gastrointestinal_symptoms),
-                key='gi'
-            )
-        else:
-            gi_selected = []
-            st.info('No gastrointestinal symptoms found in feature set.')
-
-    with tab3:
-        if neurological_symptoms:
-            neuro_selected = st.multiselect(
-                'Neurological symptoms:',
-                sorted(neurological_symptoms),
-                key='neuro'
-            )
-        else:
-            neuro_selected = []
-            st.info('No neurological symptoms found in feature set.')
-
-    with tab4:
-        if skin_symptoms:
-            skin_selected = st.multiselect(
-                'Skin symptoms:',
-                sorted(skin_symptoms),
-                key='skin'
-            )
-        else:
-            skin_selected = []
-            st.info('No skin symptoms found in feature set.')
-
-    with tab5:
-        if general_symptoms:
-            gen_selected = st.multiselect(
-                'General symptoms:',
-                sorted(general_symptoms),
-                key='gen'
-            )
-        else:
-            gen_selected = []
-            st.info('No general symptoms found in feature set.')
-
-    # Total symptom count
-    all_selected = (
-        resp_selected + gi_selected +
-        neuro_selected + skin_selected + gen_selected
-    )
-    total_symptoms = core_count + len(all_selected)
-    st.caption(f"Total symptoms selected: **{total_symptoms}**")
-
-    st.divider()
-
-    # ── Predict Button ──
-    predict_btn = st.button(
-        'Predict Triage Level',
-        use_container_width=True,
-        type='primary'
-    )
+predict_btn = st.button(
+    'Get My Triage Recommendation',
+    use_container_width=True,
+    type='primary'
+)
 
 # ── Prediction Logic ──
 if predict_btn:
     if total_symptoms == 0:
-        st.error("Please select at least one symptom before predicting.")
+        st.warning("Please select at least one symptom before continuing.")
     else:
-        # Encode demographics
         gender_val = 1 if gender == 'Male' else 0
         bp_val     = {'Low': 0, 'Normal': 1, 'High': 2}[blood_pressure]
         chol_val   = 1 if cholesterol == 'High' else 0
 
-        # Build input vector
         input_data = pd.DataFrame(0, index=[0], columns=all_features)
-        input_data['Age']              = age
-        input_data['Gender']           = gender_val
-        input_data['Blood Pressure']   = bp_val
+        input_data['Age']               = age
+        input_data['Gender']            = gender_val
+        input_data['Blood Pressure']    = bp_val
         input_data['Cholesterol Level'] = chol_val
 
-        # Core symptoms
         if fever and 'fever' in input_data.columns:
             input_data['fever'] = 1
         if cough and 'cough' in input_data.columns:
@@ -221,186 +140,141 @@ if predict_btn:
         if difficulty_breathing and 'difficulty_breathing' in input_data.columns:
             input_data['difficulty_breathing'] = 1
 
-        # Additional symptoms
-        for symp in all_selected:
+        for symp in selected_raw:
             if symp in input_data.columns:
                 input_data[symp] = 1
 
-        # Predict
         prediction   = model.predict(input_data)[0]
         proba        = model.predict_proba(input_data)[0]
         result_label = le.inverse_transform([prediction])[0]
         confidence   = np.max(proba) * 100
 
-        # ── Result Display ──
+        # ── Result Card ──
         st.divider()
-        st.subheader("📋 Triage Result")
 
-        # Colour and icon by urgency
         if result_label == 'Emergency':
-            color     = '#e74c3c'
-            bg_color  = '#fdecea'
-            
+            color    = '#c0392b'
+            bg_color = '#fdecea'
+            icon     = '🚨'
+            headline = 'Seek emergency care now'
+            action   = (
+                'Your symptoms suggest you may need urgent medical attention. '
+                'Please call **999** or go to your nearest **A&E** immediately. '
+                'Do not drive yourself if you feel unwell.'
+            )
         elif result_label == 'GP Appointment':
-            color     = '#e67e22'
-            bg_color  = '#fef9f0'
-            
+            color    = '#d35400'
+            bg_color = '#fef5ec'
+            icon     = '📅'
+            headline = 'Book a GP appointment'
+            action   = (
+                'Your symptoms suggest you should see a doctor within the next **1 to 5 days**. '
+                'Contact your GP surgery to book an appointment, or use **NHS 111** online '
+                'if you cannot get an appointment quickly.'
+            )
         else:
-            color     = '#27ae60'
-            bg_color  = '#eafaf1'
-            
+            color    = '#1e8449'
+            bg_color = '#eafaf1'
+            icon     = '🏠'
+            headline = 'Self-care at home'
+            action   = (
+                'Your symptoms suggest you can manage this at home with rest, fluids, '
+                'and over-the-counter remedies. If your symptoms worsen or do not improve '
+                'within a few days, contact your GP or call **NHS 111**.'
+            )
 
-        # Result card
         st.markdown(f"""
             <div style='
                 background-color: {bg_color};
                 border-left: 6px solid {color};
-                border-radius: 8px;
-                padding: 1.2rem 1.5rem;
+                border-radius: 0 8px 8px 0;
+                padding: 1.4rem 1.6rem;
                 margin-bottom: 1rem;
             '>
-                <h2 style='color:{color}; margin:0 0 0.4rem 0;'>
-                    {result_label}
+                <h2 style='color:{color}; margin:0 0 0.5rem 0; font-size:1.5rem;'>
+                    {icon} {headline}
                 </h2>
-                
+                <p style='margin:0; font-size:1rem; line-height:1.6; color:#2c3e50;'>
+                    {action}
+                </p>
             </div>
         """, unsafe_allow_html=True)
 
-        # Confidence and metrics
-        col1, col2, col3 = st.columns(3)
-        with col1:
+        # Confidence row
+        c1, c2, c3 = st.columns(3)
+        with c1:
             st.metric("Confidence", f"{confidence:.1f}%")
-        with col2:
-            st.metric("Symptoms Assessed", total_symptoms)
-        with col3:
-            st.metric("Triage Level", result_label)
+        with c2:
+            st.metric("Symptoms assessed", total_symptoms)
+        with c3:
+            st.metric("Recommendation", result_label)
 
-        # ── Probability Breakdown ──
-        st.subheader("📊 Class Probabilities")
+        # Probability breakdown
+        st.markdown("**How confident is the model in each category?**")
         classes = le.classes_
         prob_df = pd.DataFrame({
             'Triage Level': classes,
             'Probability (%)': [round(p * 100, 2) for p in proba]
         }).sort_values('Probability (%)', ascending=False)
 
-        st.dataframe(
-            prob_df,
-            use_container_width=True,
-            hide_index=True
-        )
-
-        # Probability bar chart
         st.bar_chart(
             prob_df.set_index('Triage Level')['Probability (%)'],
             use_container_width=True
         )
 
-        # ── Symptoms Summary ──
-        st.subheader("📝 Symptoms Submitted")
-        core_list = []
-        if fever: core_list.append('fever')
-        if cough: core_list.append('cough')
-        if fatigue: core_list.append('fatigue')
-        if difficulty_breathing: core_list.append('difficulty_breathing')
+        # Symptoms submitted
+        with st.expander("View symptoms you submitted"):
+            core_list = []
+            if fever: core_list.append('High temperature / fever')
+            if cough: core_list.append('Cough')
+            if fatigue: core_list.append('Fatigue / tiredness')
+            if difficulty_breathing: core_list.append('Difficulty breathing')
+            full_list = core_list + selected_display
+            for s in full_list:
+                st.write(f"• {s}")
 
-        full_list = core_list + all_selected
-        if full_list:
-            symptom_display = pd.DataFrame({
-                'Symptom': full_list,
-                'Status': ['Present'] * len(full_list)
-            })
-            st.dataframe(
-                symptom_display,
-                use_container_width=True,
-                hide_index=True
-            )
-
-        # ── Disclaimer ──
         st.divider()
         st.caption(
-            "⚠️ This prediction is generated by a machine learning model trained on "
-            "synthetic healthcare data. It is intended for academic and decision-support "
-            "purposes only and does not constitute medical advice. Always consult a "
-            "qualified healthcare professional for diagnosis and treatment."
+            "⚠️ This recommendation is generated by a machine learning model "
+            "trained on synthetic healthcare data. It is for decision-support only "
+            "and does not replace professional medical advice."
         )
 
+# ── About This Model ──
+st.divider()
+with st.expander("ℹ️ How accurate is this tool?"):
+    st.markdown("#### Model performance")
+    c1, c2, c3, c4 = st.columns(4)
+    with c1:
+        st.metric("Accuracy", "87.77%")
+    with c2:
+        st.metric("Macro F1", "0.8798")
+    with c3:
+        st.metric("CV F1", "0.8414")
+    with c4:
+        st.metric("Stability", "±0.0073")
 
-        # ── Model Performance Info Panel ──
-with st.expander("ℹ️ About this model — accuracy and performance", expanded=False):
+    st.markdown("""
+    This tool uses a **Random Forest** machine learning model trained on over 8,400
+    patient records. Three models were compared — Logistic Regression (62%),
+    XGBoost (85%), and Random Forest (87.77%). Random Forest was selected as the
+    most accurate and stable.
 
-    st.markdown("#### How accurate is this triage system?")
+    The most important safety finding: the model **never** misclassified an Emergency
+    case as Self-Care. When uncertain, it defaults to the middle category (GP Appointment),
+    which is the safer direction.
+    """)
 
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.metric("Model Accuracy", "87.77%", help="Correct predictions on test data")
-    with col2:
-        st.metric("Macro F1 Score", "0.8798", help="Balanced metric across all 3 classes")
-    with col3:
-        st.metric("CV F1 Mean", "0.8414", help="5-fold cross-validation result")
-    with col4:
-        st.metric("CV Stability", "±0.0073", help="Low variance = consistent results")
-
-    st.divider()
-
-    st.markdown("#### How it was built")
-
-    col_a, col_b, col_c = st.columns(3)
-
-    with col_a:
-        st.markdown("""
-        **Model selected**
-        Random Forest Classifier trained on 8,410 patient records
-        across two merged symptom datasets.
-        """)
-
-    with col_b:
-        st.markdown("""
-        **Three models compared**
-        Logistic Regression (62%), XGBoost (85.29%),
-        Random Forest (87.77%). Random Forest won on all metrics.
-        """)
-
-    with col_c:
-        st.markdown("""
-        **Class balance**
-        SMOTE was applied to balance Emergency, GP Appointment,
-        and Self-Care classes to exactly 33.3% each.
-        """)
-
-    st.divider()
-
-    st.markdown("#### Per-class recall")
-
-    r1, r2, r3 = st.columns(3)
-    with r1:
-        st.metric(
-            "Emergency recall", "87.1%",
-            delta="0 missed as Self-Care",
-            delta_color="normal"
-        )
-    with r2:
-        st.metric(
-            "GP Appointment recall", "93.7%",
-            delta="Strongest class",
-            delta_color="normal"
-        )
-    with r3:
-        st.metric(
-            "Self-Care recall", "82.5%",
-            delta="10 sent to GP (safe)",
-            delta_color="normal"
-        )
-
-    st.divider()
     st.caption(
-        "This model was developed for COM 763 Advanced Machine Learning at Wrexham University. "
-        "It is a research prototype and should not be used as a substitute for clinical judgement."
+        "Developed for COM 763 Advanced Machine Learning — Wrexham University. "
+        "Research prototype only — not validated for clinical use."
     )
 
 # ── Footer ──
 st.divider()
 st.markdown("""
     <div style='text-align:center; color:gray; font-size:0.8rem; padding-bottom:1rem;'>
+        COM 763 Advanced Machine Learning — Wrexham University |
         Model: Random Forest | Accuracy: 87.77% | Macro F1: 0.8798
     </div>
 """, unsafe_allow_html=True)
