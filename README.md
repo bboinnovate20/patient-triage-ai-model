@@ -73,7 +73,6 @@ Patient Input (Symptoms + Demographics)
             │
             ▼
    Streamlit Web Application
-   (Colour-coded recommendation)
 ```
 
 ---
