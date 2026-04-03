@@ -277,6 +277,6 @@ st.divider()
 st.markdown("""
     <div style='text-align:center; color:gray; font-size:0.8rem; padding-bottom:1rem;'>
         COM 763 Advanced Machine Learning — Wrexham University |
-        Model: Random Forest | Accuracy: 87.77% | Macro F1: 0.8798
+        Model: Random Forest | Accuracy: 88.31% | Macro F1: 0.8838
     </div>
 """, unsafe_allow_html=True)
