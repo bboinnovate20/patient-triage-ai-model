@@ -43,7 +43,7 @@ This project develops a machine learning classification system that takes patien
 | Emergency | Requires same-day or emergency care |
 
 The system is deployed as a lightweight Streamlit web application accessible from any device without installation.
-(Deloyed URL)[https://patient-triage-ai-model-ohi3ixjs2e5esc4yq9xj6a.streamlit.app/]
+[Deloyed Link](https://patient-triage-ai-model-ohi3ixjs2e5esc4yq9xj6a.streamlit.app/)
 ---
 
 ## Problem Statement
